@@ -15,15 +15,37 @@ def main():
   accuracy = leave_one_out_validation(dataset, current_set_of_features, feature_to_add)
   print("Accuracy is " + str(accuracy))
 
+  feature_search_forward(dataset)
 
   return
 
+def feature_search_forward(data):
+  current_set_of_features = []
+
+  for i in range(1,data.shape[1]):
+    print("On " + str(i) + "th level of search tree")
+    feature_to_add_at_this_level = []
+    best_so_far_accuracy = 0
+    for k in range(1,data.shape[1]):
+      if not k in current_set_of_features:
+        accuracy = leave_one_out_validation(data, current_set_of_features, k)
+
+        if accuracy > best_so_far_accuracy:
+          best_so_far_accuracy = accuracy
+          feature_to_add_at_this_level = k
+    
+    current_set_of_features = np.append(current_set_of_features, feature_to_add_at_this_level)
+
+  print(current_set_of_features)  
+
+
+
 def leave_one_out_validation(data, current_set, feature_to_add):
   number_correctly_classified = 0
-  print(data.shape[1])
+  #print(data.shape[1])
   for feature in range(1,data.shape[1]):
     if not feature in current_set and not feature == feature_to_add:
-      print("omitting feature " + str(feature))
+      #print("omitting feature " + str(feature))
       data[:,feature] = 0
 
   for i in range(0,len(data)):
