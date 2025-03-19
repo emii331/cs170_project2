@@ -1,52 +1,81 @@
 import numpy as np
-import os
+from decimal import Decimal, getcontext
 
-# defining datapaths
-small_dataset_102 = "CS170_Small_Data__102.txt"
-large_dataset_45 = "CS170_Large_Data__45.txt"
-large_dataset_12 = "CS170_Large_Data__12.txt"
-large_dataset_17 = "CS170_Large_Data__17.txt"
+# test dataset paths
+small_dataset_102 = "CS170_Small_Data__102.txt" # 3 1
+large_dataset_45 = "CS170_Large_Data__45.txt" # 16 23
+small_dataset_1 = "CS170_Small_Data__1.txt" # 5 3
+small_dataset_2 = "CS170_Small_Data__2.txt" # 4 5
+large_dataset_12 = "CS170_Large_Data__12.txt" # 26 38
+large_dataset_17 = "CS170_Large_Data__17.txt" # 18 40
 
 def main():
-  dataset = np.loadtxt(large_dataset_45)
-  current_set_of_features = [16, 39]
-  feature_to_add = 23
+  dataset = np.loadtxt(small_dataset_1)
+  current_set_of_features = [5, 3]
+  print("Answer key: " + str(current_set_of_features))
+  feature_to_add = None
 
   accuracy = leave_one_out_validation(dataset, current_set_of_features, feature_to_add)
-  print("Accuracy is " + str(accuracy))
+  print("Optimal accuracy according to answer key is " + str(accuracy*100) + "%\n")
 
+  num_samples = dataset.shape[0]
+  num_features = dataset.shape[1] - 1
+  print("This dataset has " + str(num_features) + " features (not including the class attribute), with " + str(num_samples) + " instances.\n")
+  accuracy_with_all_features = leave_one_out_validation(dataset, list(range(1, num_features)), None)
+  print("Running nearest neighbor with all " + str(num_features) + " features, using \"leaving-one-out\" evaluation, I get an accuracy of " + str(accuracy_with_all_features*100) + "%\n")
+
+  print("Beginning search.\n")
   feature_search_forward(dataset)
 
   return
 
 def feature_search_forward(data):
-  current_set_of_features = []
+  best_feature_set = []
+  best_overall_accuracy = 0
 
+  current_set_of_features = []
   for i in range(1,data.shape[1]):
-    print("On " + str(i) + "th level of search tree")
+    #print("On " + str(i) + "th level of search tree")
     feature_to_add_at_this_level = []
-    best_so_far_accuracy = 0
+    best_accuracy_at_curr_depth = 0
     for k in range(1,data.shape[1]):
       if not k in current_set_of_features:
         accuracy = leave_one_out_validation(data, current_set_of_features, k)
 
-        if accuracy > best_so_far_accuracy:
-          best_so_far_accuracy = accuracy
+        set_to_print = current_set_of_features.copy()
+        set_to_print.append(k)
+        print("Using feature(s) " + str(set_to_print) + " accuracy is " + str(accuracy*100) + "%")
+        set_to_print.pop()
+        
+        if accuracy > best_accuracy_at_curr_depth:
+          best_accuracy_at_curr_depth = accuracy
           feature_to_add_at_this_level = k
-    
-    current_set_of_features = np.append(current_set_of_features, feature_to_add_at_this_level)
 
-  print(current_set_of_features)  
+    current_set_of_features.append(feature_to_add_at_this_level)
+
+    print("Feature set " + str(current_set_of_features) + " was best, accuracy is " + str(best_accuracy_at_curr_depth*100) + "%")
+
+    if best_accuracy_at_curr_depth > best_overall_accuracy:
+      best_overall_accuracy = best_accuracy_at_curr_depth
+      best_feature_set = current_set_of_features.copy()
+    elif best_accuracy_at_curr_depth < best_overall_accuracy:
+      print("(Warning, accuracy has decreased! Continuing search in case of local maxima)")
+
+    print("\n")
 
 
+  print("\nFinished search!! The best feature subset is " + str(best_feature_set) + ", which has an accuracy of " + str(best_overall_accuracy*100) + "%")
 
-def leave_one_out_validation(data, current_set, feature_to_add):
-  number_correctly_classified = 0
+
+def leave_one_out_validation(dataset, current_set, feature_to_add):
   #print(data.shape[1])
+  data = dataset.copy()
   for feature in range(1,data.shape[1]):
     if not feature in current_set and not feature == feature_to_add:
       #print("omitting feature " + str(feature))
       data[:,feature] = 0
+
+  number_correctly_classified = 0
 
   for i in range(0,len(data)):
     object_to_classify = data[i,1:]
@@ -65,8 +94,9 @@ def leave_one_out_validation(data, current_set, feature_to_add):
     
     if label_object_to_classify == nearest_neighbor_label:
       number_correctly_classified = number_correctly_classified + 1
-    
-  accuracy = round(number_correctly_classified / len(data), 3)
+  
+  getcontext().prec = 3
+  accuracy = Decimal(number_correctly_classified / len(data))
   return accuracy
 
 
