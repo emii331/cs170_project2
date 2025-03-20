@@ -18,14 +18,19 @@ def main():
   accuracy = leave_one_out_validation(dataset, current_set_of_features, feature_to_add)
   print("Optimal accuracy according to answer key is " + str(accuracy*100) + "%\n")
 
+  search_type_selected = input("Type the number of the algorithm you want to run.\n   1) Forward Selection\n   2) Backward Elimination\n\n   Choice: ")
+  
   num_samples = dataset.shape[0]
   num_features = dataset.shape[1] - 1
-  print("This dataset has " + str(num_features) + " features (not including the class attribute), with " + str(num_samples) + " instances.\n")
+  print("\nThis dataset has " + str(num_features) + " features (not including the class attribute), with " + str(num_samples) + " instances.\n")
   accuracy_with_all_features = leave_one_out_validation(dataset, list(range(1, num_features)), None)
   print("Running nearest neighbor with all " + str(num_features) + " features, using \"leaving-one-out\" evaluation, I get an accuracy of " + str(accuracy_with_all_features*100) + "%\n")
 
   print("Beginning search.\n")
-  feature_search_forward(dataset)
+  if search_type_selected == '1':
+    feature_search_forward(dataset)
+  elif search_type_selected == '2':
+    feature_search_backward(dataset)
 
   return
 
@@ -44,7 +49,7 @@ def feature_search_forward(data):
 
         set_to_print = current_set_of_features.copy()
         set_to_print.append(k)
-        print("Using feature(s) " + str(set_to_print) + " accuracy is " + str(accuracy*100) + "%")
+        print("   Using feature(s) " + str(set_to_print) + " accuracy is " + str(accuracy*100) + "%")
         set_to_print.pop()
         
         if accuracy > best_accuracy_at_curr_depth:
@@ -58,14 +63,50 @@ def feature_search_forward(data):
     if best_accuracy_at_curr_depth > best_overall_accuracy:
       best_overall_accuracy = best_accuracy_at_curr_depth
       best_feature_set = current_set_of_features.copy()
-    elif best_accuracy_at_curr_depth < best_overall_accuracy:
+    elif best_accuracy_at_curr_depth < best_overall_accuracy and not len(current_set_of_features) == data.shape[1]:
       print("(Warning, accuracy has decreased! Continuing search in case of local maxima)")
 
     print("\n")
 
 
-  print("\nFinished search!! The best feature subset is " + str(best_feature_set) + ", which has an accuracy of " + str(best_overall_accuracy*100) + "%")
+  print("Finished search!! The best feature subset is " + str(best_feature_set) + ", which has an accuracy of " + str(best_overall_accuracy*100) + "%")
 
+
+def feature_search_backward(data):
+  best_feature_set = list(range(1, data.shape[1]))
+  best_overall_accuracy = leave_one_out_validation(data, best_feature_set, None)
+
+  current_set_of_features = list(range(1, data.shape[1]))
+  for i in range(1,data.shape[1]):
+    feature_to_remove_at_this_level = []
+    best_accuracy_at_curr_depth = 0
+    for k in range(1,data.shape[1]):
+      if k in current_set_of_features:
+        current_set_of_features.remove(k)
+        accuracy = leave_one_out_validation(data, current_set_of_features, None)
+
+        set_to_print = current_set_of_features.copy()
+        print("   Using feature(s) " + str(current_set_of_features) + " accuracy is " + str(accuracy*100) + "%")
+        current_set_of_features.append(k)
+
+        if accuracy > best_accuracy_at_curr_depth:
+          best_accuracy_at_curr_depth = accuracy
+          feature_to_remove_at_this_level = k
+    
+    print("Removing feature " + str(feature_to_remove_at_this_level) + " from feature set " + str(current_set_of_features) + " was best, accuracy is " + str(best_accuracy_at_curr_depth*100) + "%")
+    current_set_of_features.remove(feature_to_remove_at_this_level)
+
+
+    if best_accuracy_at_curr_depth > best_overall_accuracy:
+      best_overall_accuracy = best_accuracy_at_curr_depth
+      best_feature_set = current_set_of_features.copy()
+    elif best_accuracy_at_curr_depth < best_overall_accuracy and not len(current_set_of_features) == 0:
+      print("(Warning, accuracy has decreased! Continuing search in case of local maxima)")
+
+    print("\n")
+
+
+  print("Finished search!! The best feature subset is " + str(best_feature_set) + ", which has an accuracy of " + str(best_overall_accuracy*100) + "%")
 
 def leave_one_out_validation(dataset, current_set, feature_to_add):
   #print(data.shape[1])
