@@ -1,5 +1,6 @@
 import numpy as np
 from decimal import Decimal, getcontext
+import time
 
 # test dataset paths
 small_dataset_102 = "CS170_Small_Data__102.txt" # 3 1
@@ -14,6 +15,8 @@ def main():
   dataset_selected = input("Type in the name of the file to test: ")
   dataset = np.loadtxt(dataset_selected)
   search_type_selected = input("Type the number of the algorithm you want to run.\n   1) Forward Selection\n   2) Backward Elimination\n\n   Choice: ")
+
+
   
   num_samples = dataset.shape[0]
   num_features = dataset.shape[1] - 1
@@ -23,15 +26,26 @@ def main():
 
   print("Beginning search.\n")
   if search_type_selected == '1':
-    feature_search_forward(dataset)
+    stats_file_name = "ForwardStats_" + dataset_selected
+    start_time = time.time()
+    feature_search_forward(dataset, stats_file_name)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print("\nComputation time: " + str(elapsed_time) + " seconds\n") 
   elif search_type_selected == '2':
-    feature_search_backward(dataset)
-
+    stats_file_name = "BackwardStats_" + dataset_selected
+    start_time = time.time()
+    feature_search_backward(dataset, stats_file_name)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print("\nComputation time: " + str(elapsed_time) + " seconds\n")
   return
 
-def feature_search_forward(data):
+def feature_search_forward(data, stats_file_name):
   best_feature_set = []
   best_overall_accuracy = leave_one_out_validation(data, best_feature_set, None)
+
+  stats_file = open(stats_file_name, "w")
 
   current_set_of_features = []
   for i in range(1,data.shape[1]):
@@ -53,6 +67,7 @@ def feature_search_forward(data):
     current_set_of_features.append(feature_to_add_at_this_level)
 
     print("Feature set " + str(current_set_of_features) + " was best, accuracy is " + str(best_accuracy_at_curr_depth*100) + "%")
+    stats_file.write(str(current_set_of_features) + "&" + str(best_accuracy_at_curr_depth*100) + ";\n")
 
     if best_accuracy_at_curr_depth > best_overall_accuracy:
       best_overall_accuracy = best_accuracy_at_curr_depth
@@ -62,13 +77,15 @@ def feature_search_forward(data):
 
     print("\n")
 
-
+  stats_file.close()
   print("Finished search!! The best feature subset is " + str(best_feature_set) + ", which has an accuracy of " + str(best_overall_accuracy*100) + "%")
 
 
-def feature_search_backward(data):
+def feature_search_backward(data, stats_file_name):
   best_feature_set = list(range(1, data.shape[1]))
   best_overall_accuracy = leave_one_out_validation(data, best_feature_set, None)
+
+  stats_file = open(stats_file_name, "w")
 
   current_set_of_features = list(range(1, data.shape[1]))
   for i in range(1,data.shape[1]):
@@ -89,6 +106,7 @@ def feature_search_backward(data):
     
     print("Removing feature " + str(feature_to_remove_at_this_level) + " from feature set " + str(current_set_of_features) + " was best, accuracy is " + str(best_accuracy_at_curr_depth*100) + "%")
     current_set_of_features.remove(feature_to_remove_at_this_level)
+    stats_file.write(str(current_set_of_features) + "&" + str(best_accuracy_at_curr_depth*100) + ";\n")
 
 
     if best_accuracy_at_curr_depth > best_overall_accuracy:
@@ -99,7 +117,7 @@ def feature_search_backward(data):
 
     print("\n")
 
-
+  stats_file.close()
   print("Finished search!! The best feature subset is " + str(best_feature_set) + ", which has an accuracy of " + str(best_overall_accuracy*100) + "%")
 
 def leave_one_out_validation(dataset, current_set, feature_to_add):
