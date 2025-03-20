@@ -11,13 +11,11 @@ large_dataset_12 = "CS170_Large_Data__12.txt" # 26 38
 large_dataset_17 = "CS170_Large_Data__17.txt" # 18 40
 
 def main():
-  print("Welcome to Emily's Feature Selection Algorithm!")
+  print("Welcome to Emily's Feature Selection Algorithm!\n")
   dataset_selected = input("Type in the name of the file to test: ")
   dataset = np.loadtxt(dataset_selected)
-  search_type_selected = input("Type the number of the algorithm you want to run.\n   1) Forward Selection\n   2) Backward Elimination\n\n   Choice: ")
+  search_type_selected = input("\nType the number of the algorithm you want to run.\n   1) Forward Selection\n   2) Backward Elimination\n\n   Choice: ")
 
-
-  
   num_samples = dataset.shape[0]
   num_features = dataset.shape[1] - 1
   print("\nThis dataset has " + str(num_features) + " features (not including the class attribute), with " + str(num_samples) + " instances.\n")
@@ -46,6 +44,7 @@ def feature_search_forward(data, stats_file_name):
   best_overall_accuracy = leave_one_out_validation(data, best_feature_set, None)
 
   stats_file = open(stats_file_name, "w")
+  stats_file.write(str(best_feature_set) + "&" + str(best_overall_accuracy*100) + ";\n")
 
   current_set_of_features = []
   for i in range(1,data.shape[1]):
@@ -86,6 +85,7 @@ def feature_search_backward(data, stats_file_name):
   best_overall_accuracy = leave_one_out_validation(data, best_feature_set, None)
 
   stats_file = open(stats_file_name, "w")
+  stats_file.write(str(best_feature_set) + "&" + str(best_overall_accuracy*100) + ";\n")
 
   current_set_of_features = list(range(1, data.shape[1]))
   for i in range(1,data.shape[1]):

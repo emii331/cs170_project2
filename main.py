@@ -10,10 +10,10 @@ large_dataset_12 = "CS170_Large_Data__12.txt" # 26 38
 large_dataset_17 = "CS170_Large_Data__17.txt" # 18 40
 
 def main():
-  print("Welcome to Emily's Feature Selection Algorithm!")
+  print("Welcome to Emily's Feature Selection Algorithm!\n")
   dataset_selected = input("Type in the name of the file to test: ")
   dataset = np.loadtxt(dataset_selected)
-  search_type_selected = input("Type the number of the algorithm you want to run.\n   1) Forward Selection\n   2) Backward Elimination\n\n   Choice: ")
+  search_type_selected = input("\nType the number of the algorithm you want to run.\n   1) Forward Selection\n   2) Backward Elimination\n\n   Choice: ")
   
   num_samples = dataset.shape[0]
   num_features = dataset.shape[1] - 1
