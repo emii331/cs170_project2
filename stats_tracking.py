@@ -1,3 +1,5 @@
+# COPY OF MAIN TO TRACK COMPUTATION TIME AND OUTPUT TRACE RESULTS TO FILE
+
 import numpy as np
 from decimal import Decimal, getcontext
 import time
@@ -19,7 +21,7 @@ def main():
   num_samples = dataset.shape[0]
   num_features = dataset.shape[1] - 1
   print("\nThis dataset has " + str(num_features) + " features (not including the class attribute), with " + str(num_samples) + " instances.\n")
-  accuracy_with_all_features = leave_one_out_validation(dataset, list(range(1, num_features)), None)
+  accuracy_with_all_features = leave_one_out_validation(dataset, list(range(1, num_features+1)), None)
   print("Running nearest neighbor with all " + str(num_features) + " features, using \"leaving-one-out\" evaluation, I get an accuracy of " + str(accuracy_with_all_features*100) + "%\n")
 
   print("Beginning search.\n")
@@ -28,7 +30,7 @@ def main():
     start_time = time.time()
     feature_search_forward(dataset, stats_file_name)
     end_time = time.time()
-    elapsed_time = end_time - start_time
+    elapsed_time = end_time - start_time # calculate computation time
     print("\nComputation time: " + str(elapsed_time) + " seconds\n") 
   elif search_type_selected == '2':
     stats_file_name = "BackwardStats_" + dataset_selected
