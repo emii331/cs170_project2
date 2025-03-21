@@ -36,7 +36,6 @@ def feature_search_forward(data):
   class_2_count = np.count_nonzero(class_column == 2)
   default_rate = max(class_1_count, class_2_count) / len(data)
   best_overall_accuracy = default_rate
-  print(default_rate)
 
   current_set_of_features = []
   for i in range(1,data.shape[1]):
