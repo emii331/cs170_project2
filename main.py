@@ -18,7 +18,7 @@ def main():
   num_samples = dataset.shape[0]
   num_features = dataset.shape[1] - 1
   print("\nThis dataset has " + str(num_features) + " features (not including the class attribute), with " + str(num_samples) + " instances.\n")
-  accuracy_with_all_features = leave_one_out_validation(dataset, list(range(1, num_features)), None)
+  accuracy_with_all_features = leave_one_out_validation(dataset, list(range(1, num_features+1)), None)
   print("Running nearest neighbor with all " + str(num_features) + " features, using \"leaving-one-out\" evaluation, I get an accuracy of " + str(accuracy_with_all_features*100) + "%\n")
 
   print("Beginning search.\n")
@@ -31,7 +31,12 @@ def main():
 
 def feature_search_forward(data):
   best_feature_set = []
-  best_overall_accuracy = leave_one_out_validation(data, best_feature_set, None)
+  class_column = data[:,0]
+  class_1_count = np.count_nonzero(class_column == 1)
+  class_2_count = np.count_nonzero(class_column == 2)
+  default_rate = max(class_1_count, class_2_count) / len(data)
+  best_overall_accuracy = default_rate
+  print(default_rate)
 
   current_set_of_features = []
   for i in range(1,data.shape[1]):
